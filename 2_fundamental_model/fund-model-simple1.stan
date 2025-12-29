@@ -87,14 +87,24 @@ model {
   // --- Priors ---
   delta ~ normal(0, sigma_delta);
 
-  beta ~ cauchy(0, sigma_beta);
-  gamma ~ cauchy(0, sigma_gamma);
+  // beta ~ cauchy(0, sigma_beta);
+  // gamma ~ cauchy(0, sigma_gamma);
+  beta  ~ normal(0, sigma_beta);
+  gamma ~ normal(0, sigma_gamma);
 
-  sigma_alpha ~ normal(0, sigma);
-  sigma_delta ~ normal(0, sigma);
-  sigma_beta  ~ normal(0, sigma);
-  sigma_gamma ~ normal(0, sigma);
-  sigma_epsilon ~ normal(0, sigma);
+
+  // sigma_alpha ~ normal(0, sigma);
+  // sigma_delta ~ normal(0, sigma);
+  // sigma_beta  ~ normal(0, sigma);
+  // sigma_gamma ~ normal(0, sigma);
+  // sigma_epsilon ~ normal(0, sigma);
+  
+  sigma_alpha ~ normal(0, 0.05);   // 예시: α는 선거 간 변동이 작다는 가정
+  sigma_delta ~ normal(0, 0.10);   // 선거-level intercept
+  sigma_beta  ~ normal(0, 0.20);   // X 계수 스케일
+  sigma_gamma ~ normal(0, 0.20);   // Z 계수 스케일
+  for (t in 1:TT) sigma_epsilon[t] ~ normal(0, 0.03); // 관측오차
+
 }
 
 generated quantities {

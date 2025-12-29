@@ -63,16 +63,10 @@ model {
   beta ~ cauchy(0, sigma_beta);
   gamma ~ cauchy(0, sigma_gamma);
 
-  // sigma_alpha ~ normal(0, sigma);
-  // sigma_delta ~ normal(0, sigma);
-  // sigma_beta ~ normal(0, sigma);
-  // sigma_gamma ~ normal(0, sigma);
-  // sigma_epsilon ~ normal(0, sigma);
-  
-  sigma_alpha ~ normal(0, 1);
-  sigma_delta ~ normal(0, 1);
-  sigma_beta  ~ normal(0, 1);
-  sigma_gamma ~ normal(0, 1);
-  sigma_epsilon ~ normal(0, 1);
+  sigma_alpha ~ normal(0, sigma);
+  sigma_delta ~ normal(0, sigma);
+  sigma_beta ~ normal(0, sigma);
+  sigma_gamma ~ normal(0, sigma);
+  sigma_epsilon ~ normal(0, sigma);
 }
 

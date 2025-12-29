@@ -3,8 +3,8 @@
 # ─────────────────────────────────────
 # 📦 준비
 # ─────────────────────────────────────
-rm(list=ls())
-load("pe.RData")
+# rm(list=ls())
+# load("pe.RData")
 
 library(cmdstanr)
 library(posterior)
@@ -18,36 +18,36 @@ dir.create("stan_outputs", showWarnings = FALSE)
 # ─────────────────────────────────────────────────────────────
 
 # [A] 20대 예측: fit pe15~pe19 (TT=5), pred pe20
-{
-  target_label <- "pe20"
-  
-  X <- X_20; Z <- Z_20
-  pe_sum <- pe_sum_20
-  pe_twoparty_vote_share <- pe_twoparty_vote_share_20
-  democ_index <- democ_index_20
-  Pop_weight <- Pop_weight_20
-  
-  pe_names_fit <- paste0("pe", 15:19)
-  pe_pred_name <- "pe20"
-  
-  cat("\n▶ DATA SWITCH: 20th PE prediction (fit pe15–pe19 → pred pe20)\n")
-}
-
-# # [B] 21대 예측: fit pe15~pe20 (TT=6), pred pe21
 # {
-#   target_label <- "pe21"
-#
-#   X <- X_21; Z <- Z_21
-#   pe_sum <- pe_sum_21
-#   pe_twoparty_vote_share <- pe_twoparty_vote_share_21
-#   democ_index <- democ_index_21
-#   Pop_weight <- Pop_weight_21
-#
-#   pe_names_fit <- paste0("pe", 15:20)
-#   pe_pred_name <- "pe21"
-#
-#   cat("\n▶ DATA SWITCH: 21st PE prediction (fit pe15–pe20 → pred pe21)\n")
+#   target_label <- "pe20"
+#   
+#   X <- X_20; Z <- Z_20
+#   pe_sum <- pe_sum_20
+#   pe_twoparty_vote_share <- pe_twoparty_vote_share_20
+#   democ_index <- democ_index_20
+#   Pop_weight <- Pop_weight_20
+#   
+#   pe_names_fit <- paste0("pe", 15:19)
+#   pe_pred_name <- "pe20"
+#   
+#   cat("\n▶ DATA SWITCH: 20th PE prediction (fit pe15–pe19 → pred pe20)\n")
 # }
+
+# [B] 21대 예측: fit pe15~pe20 (TT=6), pred pe21
+{
+  target_label <- "pe21"
+
+  X <- X_21; Z <- Z_21
+  pe_sum <- pe_sum_21
+  pe_twoparty_vote_share <- pe_twoparty_vote_share_21
+  democ_index <- democ_index_21
+  Pop_weight <- Pop_weight_21
+
+  pe_names_fit <- paste0("pe", 15:20)
+  pe_pred_name <- "pe21"
+
+  cat("\n▶ DATA SWITCH: 21st PE prediction (fit pe15–pe20 → pred pe21)\n")
+}
 
 # ─────────────────────────────────────
 # ✅ 공통 파생값 + 안전장치
@@ -158,7 +158,8 @@ data_list_23 <- list(
 
 run_and_save <- function(stan_file, data_list, model_tag, out_dir,
                          seed=1234, chains=4, parallel_chains=4,
-                         iter_warmup=2000, iter_sampling=8000, thin=1){
+                         iter_warmup=2000, iter_sampling=8000, adapt_delta = 0.98,   
+                         max_treedepth = 15, thin=1){
   
   mod <- cmdstan_model(
     stan_file,
@@ -172,7 +173,9 @@ run_and_save <- function(stan_file, data_list, model_tag, out_dir,
     parallel_chains = parallel_chains,
     iter_warmup = iter_warmup,
     iter_sampling = iter_sampling,
-    thin = thin
+    thin = thin,
+    adapt_delta = adapt_delta,
+    max_treedepth = max_treedepth
   )
   
   fit$save_object(file.path(out_dir, paste0("fit_", model_tag, ".RDS")))
@@ -190,7 +193,7 @@ run_and_save <- function(stan_file, data_list, model_tag, out_dir,
 
 # (1) baseline (Kang2024)
 fit1 <- run_and_save(
-  stan_file = "2_fundamental_model/fund-model-simple.stan",
+  stan_file = "2_fundamental_model/fund-model-simple1.stan",
   data_list = data_list_1,
   model_tag = "m1_baseline",
   out_dir   = out_dir
@@ -207,7 +210,22 @@ fit2 <- run_and_save(
   out_dir   = out_dir
 )
 
-# (3) GLMM splogit (counts + splogit link)
+
+fit_quick <- run_and_save(
+  stan_file = "2_fundamental_model/fund-model-simple_GLMM1.stan",
+  data_list = data_list_23,
+  model_tag = "quick",
+  out_dir   = out_dir,
+  chains = 2,
+  parallel_chains = 2,
+  iter_warmup = 800,
+  iter_sampling = 400,
+  adapt_delta = 0.9,
+  max_treedepth = 15
+)
+
+
+ekd# (3) GLMM splogit (counts + splogit link)
 fit3 <- run_and_save(
   stan_file = "2_fundamental_model/fund-model-simple_GLMM_splogit1.stan",
   data_list = data_list_23,

@@ -53,7 +53,6 @@ pe14$primary_cluster[
 # ────────────────────────────────────────────────
 cluster <- list(
   "Seoul"            = "Seoul",
-  "Gyeonggi-do"      = "Gyeonggi-do",
   "Incheon"          = "Incheon",
   "Daejeon"          = "Daejeon",
   "Chungcheongbuk-do"= "Chungcheongbuk-do",
@@ -67,7 +66,8 @@ cluster <- list(
   "Ulsan"            = "Ulsan",              # 🔹 새로 분리
   "Gyeongsangnam-do" = "Gyeongsangnam-do",   # 🔹 울산 제외
   "Gangwon-do"       = "Gangwon-do",
-  "Jeju-do"          = "Jeju-do"
+  "Jeju-do"          = "Jeju-do",
+  "Gyeonggi-do"      = "Gyeonggi-do"
 )
 
 # ────────────────────────────────────────────────
