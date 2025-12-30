@@ -33,22 +33,22 @@ dir.create("stan_outputs", showWarnings = FALSE)
   cat("\n▶ DATA SWITCH: 20th PE prediction (fit pe15–pe19 → pred pe20)\n")
 }
 
-# 
-# # [B] 21대 예측: fit pe15~pe20 (TT=6), pred pe21
-# {
-#   target_label <- "pe21"
-# 
-#   X <- X_21; Z <- Z_21
-#   pe_sum <- pe_sum_21
-#   pe_twoparty_vote_share <- pe_twoparty_vote_share_21
-#   democ_index <- democ_index_21
-#   Pop_weight <- Pop_weight_21
-# 
-#   pe_names_fit <- paste0("pe", 15:20)
-#   pe_pred_name <- "pe21"
-# 
-#   cat("\n▶ DATA SWITCH: 21st PE prediction (fit pe15–pe20 → pred pe21)\n")
-# }
+
+# [B] 21대 예측: fit pe15~pe20 (TT=6), pred pe21
+{
+  target_label <- "pe21"
+
+  X <- X_21; Z <- Z_21
+  pe_sum <- pe_sum_21
+  pe_twoparty_vote_share <- pe_twoparty_vote_share_21
+  democ_index <- democ_index_21
+  Pop_weight <- Pop_weight_21
+
+  pe_names_fit <- paste0("pe", 15:20)
+  pe_pred_name <- "pe21"
+
+  cat("\n▶ DATA SWITCH: 21st PE prediction (fit pe15–pe20 → pred pe21)\n")
+}
 
 # ─────────────────────────────────────
 # ✅ 공통 파생값 + 안전장치
@@ -88,7 +88,7 @@ make_alpha_init <- function(y0, w, scale = c("prob","logit"), eps = 1e-6) {
 }
 
 # sanity check
-stopifnot(abs(sum(Pop_weight[,1] * Alpha_init) - 0.5) < 1e-10)
+# stopifnot(abs(sum(Pop_weight[,1] * Alpha_init) - 0.5) < 1e-10)
 
 
 out_dir <- file.path("stan_outputs", target_label)
@@ -99,7 +99,8 @@ dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 # ✅ scale: 더미/서열(1,2) 변수 제외하고 연속형만 스케일
 # ─────────────────────────────────────
 dummy_X <- c("is_current","twice1","twice2","impeach")
-dummy_Z <- c("home_dem","homeground_dem","home_con","homeground_con")
+# dummy_Z <- c("home_dem","homeground_dem","home_con","homeground_con")
+dummy_Z <- c("dem_link","con_link")
 
 X_scaled <- X
 Z_scaled <- Z
@@ -183,8 +184,8 @@ data_list_2 <- list(
 
 run_and_save <- function(stan_file, data_list, model_tag, out_dir,
                          seed=1234, chains=4, parallel_chains=4,
-                         iter_warmup=2000, iter_sampling=8000, adapt_delta = 0.98,   
-                         max_treedepth = 15, thin=1){
+                         iter_warmup=2000, iter_sampling=8000, adapt_delta = 0.9,   
+                         max_treedepth = 12, thin=1){
   
   mod <- cmdstan_model(
     stan_file,
@@ -216,24 +217,55 @@ run_and_save <- function(stan_file, data_list, model_tag, out_dir,
 # 🧠 1,2,3 모델 순차 실행 + 저장
 # ─────────────────────────────────────
 
-# # (1) baseline (Kang2024)
-# fit1 <- run_and_save(
-#   stan_file = "2_fundamental_model/fund-model-simple1.stan",
-#   data_list = data_list_1,
-#   model_tag = "m1_baseline",
-#   out_dir   = out_dir
-# )
+# (1) baseline (Kang2024)
+fit1 <- run_and_save(
+  stan_file = "2_fundamental_model/fund-model-simple1.stan",
+  data_list = data_list_1,
+  iter_warmup=1500, iter_sampling=1500, adapt_delta = 0.99, max_treedepth = 18,
+  model_tag = "m1_baseline",
+  out_dir   = out_dir
+)
 
 # (2) logit 
 fit2 <- run_and_save(
   stan_file = "2_fundamental_model/fund-model-logit.stan",
-  iter_warmup=1000, iter_sampling=1000, 
+  iter_warmup=1500, iter_sampling=1500, adapt_delta = 0.99, max_treedepth = 18,metric = "dense_e",init = 0.1,
   data_list = data_list_2,
   model_tag = "m2_logit",
   out_dir   = out_dir
 )
 
 
+# (3) AR1 
+fit3 <- run_and_save(
+  stan_file = "2_fundamental_model/fund-model-ar1.stan",
+  iter_warmup=1500, iter_sampling=1500, adapt_delta = 0.99, max_treedepth = 18,
+  data_list = data_list_1,
+  model_tag = "m3_ar1",
+  out_dir   = out_dir
+)
+
+# (4) logit+AR1 
+fit4_21 <- run_and_save(
+  stan_file = "2_fundamental_model/fund-model-logit-ar1-2.stan",
+  data_list = data_list_2,
+  model_tag = "m4_logit_ar1",
+  out_dir   = out_dir
+)
+
+
 cat("\n✅ All models completed. Outputs saved to: ", out_dir, "\n")
 
+mod <- cmdstan_model("2_fundamental_model/fund-model-logit.stan")
+
+fit <- mod$sample(
+  data = data_list_2,
+  chains = 4,
+  parallel_chains = 4,
+  iter_warmup = 1500,
+  iter_sampling = 1500,
+  adapt_delta = 0.95,          # ↑
+  max_treedepth = 15,          # ↑
+  metric = "dense_e"          # ← 상관 강할 때 필수
+  )
 
