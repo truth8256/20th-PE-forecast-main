@@ -35,20 +35,20 @@ dir.create("stan_outputs", showWarnings = FALSE)
 
 
 # [B] 21대 예측: fit pe15~pe20 (TT=6), pred pe21
-{
-  target_label <- "pe21"
-
-  X <- X_21; Z <- Z_21
-  pe_sum <- pe_sum_21
-  pe_twoparty_vote_share <- pe_twoparty_vote_share_21
-  democ_index <- democ_index_21
-  Pop_weight <- Pop_weight_21
-
-  pe_names_fit <- paste0("pe", 15:20)
-  pe_pred_name <- "pe21"
-
-  cat("\n▶ DATA SWITCH: 21st PE prediction (fit pe15–pe20 → pred pe21)\n")
-}
+# {
+#   target_label <- "pe21"
+# 
+#   X <- X_21; Z <- Z_21
+#   pe_sum <- pe_sum_21
+#   pe_twoparty_vote_share <- pe_twoparty_vote_share_21
+#   democ_index <- democ_index_21
+#   Pop_weight <- Pop_weight_21
+# 
+#   pe_names_fit <- paste0("pe", 15:20)
+#   pe_pred_name <- "pe21"
+# 
+#   cat("\n▶ DATA SWITCH: 21st PE prediction (fit pe15–pe20 → pred pe21)\n")
+# }
 
 # ─────────────────────────────────────
 # ✅ 공통 파생값 + 안전장치
@@ -219,19 +219,18 @@ run_and_save <- function(stan_file, data_list, model_tag, out_dir,
 
 # (1) baseline (Kang2024)
 fit1 <- run_and_save(
-  stan_file = "2_fundamental_model/fund-model-simple1.stan",
-  data_list = data_list_1,
-  iter_warmup=1500, iter_sampling=1500, adapt_delta = 0.99, max_treedepth = 18,
-  model_tag = "m1_baseline",
+  stan_file = "2_fundamental_model/fund-model-simple2.stan",
+  data_list = data_list_2,
+  model_tag = "m1_baseline_2",
+  adapt_delta = 0.98, max_treedepth = 18,
   out_dir   = out_dir
 )
 
 # (2) logit 
 fit2 <- run_and_save(
   stan_file = "2_fundamental_model/fund-model-logit.stan",
-  iter_warmup=1500, iter_sampling=1500, adapt_delta = 0.99, max_treedepth = 18,metric = "dense_e",init = 0.1,
   data_list = data_list_2,
-  model_tag = "m2_logit",
+  model_tag = "m2_logit_1231",
   out_dir   = out_dir
 )
 
@@ -239,33 +238,20 @@ fit2 <- run_and_save(
 # (3) AR1 
 fit3 <- run_and_save(
   stan_file = "2_fundamental_model/fund-model-ar1.stan",
-  iter_warmup=1500, iter_sampling=1500, adapt_delta = 0.99, max_treedepth = 18,
   data_list = data_list_1,
-  model_tag = "m3_ar1",
+  model_tag = "m3_ar1_1231",
   out_dir   = out_dir
 )
 
 # (4) logit+AR1 
-fit4_21 <- run_and_save(
-  stan_file = "2_fundamental_model/fund-model-logit-ar1-2.stan",
+fit51 <- run_and_save(
+  stan_file = "2_fundamental_model/fund-model-logit-ar1-3.stan",
   data_list = data_list_2,
-  model_tag = "m4_logit_ar1",
+  model_tag = "m4_logit_ar1_1231",
   out_dir   = out_dir
 )
 
 
 cat("\n✅ All models completed. Outputs saved to: ", out_dir, "\n")
 
-mod <- cmdstan_model("2_fundamental_model/fund-model-logit.stan")
-
-fit <- mod$sample(
-  data = data_list_2,
-  chains = 4,
-  parallel_chains = 4,
-  iter_warmup = 1500,
-  iter_sampling = 1500,
-  adapt_delta = 0.95,          # ↑
-  max_treedepth = 15,          # ↑
-  metric = "dense_e"          # ← 상관 강할 때 필수
-  )
 

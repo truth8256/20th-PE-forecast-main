@@ -35,7 +35,8 @@ gni5_by_pe         <- setNames(c( 4.3, 8.8, 5.6, 3.0, 4.6, 3.8, 3.9), pe_all)
 D_primary_by_pe    <- setNames(c(0.78,0.72,0.44,0.57,0.57,0.50,0.90), pe_all)
 P_primary_by_pe    <- setNames(c(0.60,0.68,0.50,0.84,0.47,0.48,0.57), pe_all)
 
-impeach_base_by_pe <- setNames(c(0,0,1,0,1,0,1), pe_all)
+# impeach_base_by_pe <- setNames(c(0,0,1,0,1,0,1), pe_all)
+impeach_base_by_pe <- setNames(c(0,0,-1,0,1,0,1), pe_all)
 
 # ────────────────────────────────────────────────
 # 1) X 생성 함수: pe 범위에 따라 pe 단위 행렬 -> P 배 확장
