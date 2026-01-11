@@ -34,7 +34,7 @@ dir.create("stan_outputs", showWarnings = FALSE)
 }
 
 
-# [B] 21대 예측: fit pe15~pe20 (TT=6), pred pe21
+# # [B] 21대 예측: fit pe15~pe20 (TT=6), pred pe21
 # {
 #   target_label <- "pe21"
 # 
@@ -145,37 +145,37 @@ data_list_2 <- list(
 # # ─────────────────────────────────────
 # # (2)(3) GLMM용 counts 생성 (fit 기간만)
 # # ─────────────────────────────────────
-# Y_mat <- matrix(NA_integer_, nrow=P, ncol=TT)
-# N_mat <- matrix(NA_integer_, nrow=P, ncol=TT)
-# 
-# for(t in 1:TT){
-#   pe_name <- pe_names_fit[t]
-#   df <- pe_sum[[pe_name]][names(cluster), , drop=FALSE]
-#   
-#   dem_col <- as.integer(democ_index[pe_name])
-#   con_col <- setdiff(1:2, dem_col)
-#   
-#   dem <- as.integer(df[, dem_col])
-#   con <- as.integer(df[, con_col])
-#   
-#   Y_mat[, t] <- dem
-#   N_mat[, t] <- dem + con
-# }
-# 
-# Y_count <- as.integer(c(t(Y_mat)))
-# N_count <- as.integer(c(t(N_mat)))
-# 
-# data_list_23 <- list(
-#   P = P, TT = TT, N = N,
-#   K = ncol(X_scaled), L = ncol(Z_scaled),
-#   X = X_scaled[1:N, , drop = FALSE],
-#   Z = Z_scaled[1:N, , drop = FALSE],
-#   X_pred = X_scaled[(N+1):(N+P), , drop = FALSE],
-#   Z_pred = Z_scaled[(N+1):(N+P), , drop = FALSE],
-#   Y_count = Y_count,
-#   N_count = N_count,
-#   Pop_weight = Pop_weight
-# )
+Y_mat <- matrix(NA_integer_, nrow=P, ncol=TT)
+N_mat <- matrix(NA_integer_, nrow=P, ncol=TT)
+
+for(t in 1:TT){
+  pe_name <- pe_names_fit[t]
+  df <- pe_sum[[pe_name]][names(cluster), , drop=FALSE]
+
+  dem_col <- as.integer(democ_index[pe_name])
+  con_col <- setdiff(1:2, dem_col)
+
+  dem <- as.integer(df[, dem_col])
+  con <- as.integer(df[, con_col])
+
+  Y_mat[, t] <- dem
+  N_mat[, t] <- dem + con
+}
+
+Y_count <- as.integer(c(t(Y_mat)))
+N_count <- as.integer(c(t(N_mat)))
+
+data_list_23 <- list(
+  P = P, TT = TT, N = N,
+  K = ncol(X_scaled), L = ncol(Z_scaled),
+  X = X_scaled[1:N, , drop = FALSE],
+  Z = Z_scaled[1:N, , drop = FALSE],
+  X_pred = X_scaled[(N+1):(N+P), , drop = FALSE],
+  Z_pred = Z_scaled[(N+1):(N+P), , drop = FALSE],
+  Y_count = Y_count,
+  N_count = N_count,
+  Pop_weight = Pop_weight
+)
 
 
 # ─────────────────────────────────────
@@ -203,7 +203,7 @@ run_and_save <- function(stan_file, data_list, model_tag, out_dir,
     adapt_delta = adapt_delta,
     max_treedepth = max_treedepth
   )
-  
+
   fit$save_object(file.path(out_dir, paste0("fit_", model_tag, ".RDS")))
   summ <- fit$summary()
   readr::write_csv(summ, file.path(out_dir, paste0("summary_", model_tag, ".csv")))
@@ -219,39 +219,42 @@ run_and_save <- function(stan_file, data_list, model_tag, out_dir,
 
 # (1) baseline (Kang2024)
 fit1 <- run_and_save(
-  stan_file = "2_fundamental_model/fund-model-simple2.stan",
-  data_list = data_list_2,
-  model_tag = "m1_baseline_2",
-  adapt_delta = 0.98, max_treedepth = 18,
-  out_dir   = out_dir
-)
-
-# (2) logit 
-fit2 <- run_and_save(
-  stan_file = "2_fundamental_model/fund-model-logit.stan",
-  data_list = data_list_2,
-  model_tag = "m2_logit_1231",
-  out_dir   = out_dir
-)
-
-
-# (3) AR1 
-fit3 <- run_and_save(
-  stan_file = "2_fundamental_model/fund-model-ar1.stan",
+  stan_file = "2_fundamental_model/fund-model-simple3.stan",
   data_list = data_list_1,
-  model_tag = "m3_ar1_1231",
+  model_tag = "m1_baseline3_0110",
+  adapt_delta = 0.98,  max_treedepth = 18,
   out_dir   = out_dir
 )
-
-# (4) logit+AR1 
-fit51 <- run_and_save(
-  stan_file = "2_fundamental_model/fund-model-logit-ar1-3.stan",
-  data_list = data_list_2,
-  model_tag = "m4_logit_ar1_1231",
-  out_dir   = out_dir
-)
+# 
+# # (2) logit
+# fit2 <- run_and_save(
+#   stan_file = "2_fundamental_model/fund-model-logit5.stan",
+#   data_list = data_list_2,
+#   model_tag = "m2_logit5_0109",
+#   out_dir   = out_dir
+# )
+# 
+# 
+# # (3) beta
+# fit3 <- run_and_save(
+#   stan_file = "2_fundamental_model/fund-model-beta3.stan",
+#   data_list = data_list_2,
+#   model_tag = "m3_beta3_0109",
+#   out_dir   = out_dir
+# )
+# 
+# # (4) logit+AR1
+# fit4 <- run_and_save(
+#   stan_file = "2_fundamental_model/fund-model-logit-ar1-3.stan",
+#   data_list = data_list_2,
+#   adapt_delta = 0.95,  max_treedepth = 12,
+#   model_tag = "m4_logit_ar1_3_0109",
+#   out_dir   = out_dir
+# )
 
 
 cat("\n✅ All models completed. Outputs saved to: ", out_dir, "\n")
 
 
+# save.image(file = "session_env.RData")
+# Rscript -e 'load("session_env.RData");source("2_fundamental_model/run-fund-model_20251227.R")'

@@ -171,3 +171,16 @@ pe_sum_20 <- pe_sum_fit_20
 pe_sum_21 <- pe_sum_fit_21
 
 
+# ────────────────────────────────────────────────
+# actual_y_20, actual_y_21 생성
+# ────────────────────────────────────────────────
+
+# actual_y_20: pe20 기준 실제 양당 득표율
+actual_y_20 <- as.numeric(twoparty_vote_share(pe20_sum, 1))
+
+# actual_y_21: pe21 기준 실제 양당 득표율
+actual_y_21 <- as.numeric(twoparty_vote_share(pe21_sum, 1))
+
+# 이름 붙이기 (선택)
+names(actual_y_20) <- rownames(pe20_sum)
+names(actual_y_21) <- rownames(pe21_sum)

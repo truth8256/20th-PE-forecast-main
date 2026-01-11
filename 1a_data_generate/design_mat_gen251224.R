@@ -59,7 +59,7 @@ make_X <- function(pe_nums, P){
   D_primary <- as.numeric(D_primary_by_pe[pe_chr])
   P_primary <- as.numeric(P_primary_by_pe[pe_chr])
   
-  impeach <- as.numeric(impeach_base_by_pe[pe_chr]) * is_current
+  impeach <- as.numeric(impeach_base_by_pe[pe_chr]) * is_current 
   
   X_temp <- cbind(
     is_current, twice1, twice2, approval, net_approval,
